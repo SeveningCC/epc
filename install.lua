@@ -35,7 +35,7 @@ if not pkg_data then error("Falha ao parsear package.json") end
 
 local dest = INSTALL_PATH .. "/epc.lua"
 fs.makeDir(INSTALL_PATH)
-local current_path = shell.getPath()
+local current_path = shell.path()
 local already_in_path = false
 for segment in current_path:gmatch("[^:]+") do
   if segment == INSTALL_PATH then already_in_path = true ; break end
