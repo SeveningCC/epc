@@ -1,8 +1,10 @@
 {
   "name": "El Pkg Congroo",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A CC:Tweaked package manager.",
-  "dependencies": [],
+  "dependencies": [
+    "SeveningCC/soletre"
+  ],
   "bin": [
     "epc.lua"
   ],

@@ -26,7 +26,7 @@ end
 local function ensure_path(dir)
   fs.makeDir(dir)
   if not shell then return end
-  local current = shell.getPath()
+  local current = shell.path()
   for segment in current:gmatch("[^:]+") do
     if segment == dir then return end
   end

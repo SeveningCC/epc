@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-global
 -- install.lua — Bootstrap installer do EPC (El Pkg Congroo)
 -- Uso: wget run https://raw.githubusercontent.com/SeveningCC/epc/refs/heads/main/install.lua [tag]
 
