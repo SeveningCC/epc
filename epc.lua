@@ -270,27 +270,6 @@ if _is_require then
   }
 end
 
--- ─── Autocomplete ─────────────────────────────────────────────────────────────
-
-if shell then
-  local completion       = require("cc.completion")
-  local shell_completion = require("cc.shell.completion")
-
-  shell.setCompletionFunction(shell.getRunningProgram(), shell_completion.build(
-    { shell_completion.choice, { "install", "uninstall", "update", "list" }, true },
-    function(_, text, previous)
-      local cmd = previous[#previous]
-      if cmd == "uninstall" or cmd == "update" then
-        registry:load()
-        local ids = {}
-        for id in pairs(registry:list()) do ids[#ids + 1] = id end
-        table.sort(ids)
-        return completion.choice(text, ids, true)
-      end
-    end
-  ))
-end
-
 -- ─── CLI ──────────────────────────────────────────────────────────────────────
 
 local commands = {

@@ -8,5 +8,8 @@
   ],
   "startup": [
     "09-epc.lua"
+  ],
+  "autocomplete": [
+    "epc-autocomplete.lua"
   ]
 }
