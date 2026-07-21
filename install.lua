@@ -36,6 +36,8 @@ if not pkg_data then error("Falha ao parsear package.json") end
 
 local dest = INSTALL_PATH .. "/epc.lua"
 fs.makeDir(INSTALL_PATH)
+fs.makeDir("/startup")
+fs.makeDir("/sys/autocomplete")
 local current_path = shell.path()
 local already_in_path = false
 for segment in current_path:gmatch("[^:]+") do
@@ -78,6 +80,9 @@ wf.close()
 
 print("")
 print(("EPC v%s instalado com sucesso!"):format(pkg_data.version))
+print("")
+print("Instalando dependencias do EPC...")
+shell.run(dest, "update", "SeveningCC/epc")
 print("")
 print("Uso: epc install <owner/repo>")
 print("     epc update SeveningCC/epc")

@@ -182,6 +182,9 @@ function Package:install()
       end
     end
   end
+  if #installed == 0 then
+    print("  Aviso: nenhum arquivo instalado (verifique se o package.json usa 'bin', 'startup' ou 'autocomplete')")
+  end
   registry:load()
   registry:add(self, installed)
   for _, dep_id in ipairs(self.dependencies) do
