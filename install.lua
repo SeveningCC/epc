@@ -35,6 +35,18 @@ if not pkg_data then error("Falha ao parsear package.json") end
 
 local dest = INSTALL_PATH .. "/epc.lua"
 fs.makeDir(INSTALL_PATH)
+local current_path = shell.getPath()
+local already_in_path = false
+for segment in current_path:gmatch("[^:]+") do
+  if segment == INSTALL_PATH then already_in_path = true ; break end
+end
+if not already_in_path then
+  local new_path = current_path .. ":" .. INSTALL_PATH
+  shell.setPath(new_path)
+  settings.set("shell.path", new_path)
+  settings.save()
+  print("  + " .. INSTALL_PATH .. " adicionado ao Path")
+end
 local f = fs.open(dest, "w")
 if not f then error("Falha ao escrever: " .. dest) end
 f.write(http_get(base_url .. "/epc.lua"))

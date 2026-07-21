@@ -1,9 +1,16 @@
+local _is_require = type((...)) == "string"
+
 local base64 = require("cc.base64")
 
 -- ─── Settings ─────────────────────────────────────────────────────────────────
 
-local INSTALL_PATH  = settings.get("epc.install_path", "/pkgs")
 local REGISTRY_PATH = "/.local/epc/packages"
+
+local FILE_TYPES = {
+  bin          = settings.get("epc.path.bin",          "/pkgs"),
+  startup      = settings.get("epc.path.startup",      "/startup"),
+  autocomplete = settings.get("epc.path.autocomplete", "/sys/autocomplete"),
+}
 
 -- ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -14,6 +21,19 @@ end
 local function dest_path(base, rel)
   if base == "/" then return "/" .. rel end
   return base .. "/" .. rel
+end
+
+local function ensure_path(dir)
+  fs.makeDir(dir)
+  if not shell then return end
+  local current = shell.getPath()
+  for segment in current:gmatch("[^:]+") do
+    if segment == dir then return end
+  end
+  local new_path = current .. ":" .. dir
+  shell.setPath(new_path)
+  settings.set("shell.path", new_path)
+  settings.save()
 end
 
 local function write_file(dest, content)
@@ -55,7 +75,6 @@ function registry:add(pkg, installed_files)
     description  = pkg.description,
     files        = installed_files,
     dependencies = pkg.dependencies,
-    install_path = pkg.install_path,
   }
   self:save()
 end
@@ -92,9 +111,11 @@ function Package:new(owner, repo, tag, data)
     name         = data.name,
     version      = data.version,
     description  = data.description or "",
-    files        = copy_array(data.files),
+    bin          = copy_array(data.bin),
+    startup      = copy_array(data.startup),
+    autocomplete = copy_array(data.autocomplete),
     dependencies = copy_array(data.dependencies),
-    install_path = data.install_path,
+    files        = copy_array(data.files),  -- installed paths, populado pelo registry
   }, self)
 end
 
@@ -148,9 +169,18 @@ end
 
 function Package:install()
   local installed = {}
-  local effective_path = self.install_path or INSTALL_PATH
-  for _, path in ipairs(self.files) do
-    download_tree(self.owner, self.repo, self.tag, path, installed, effective_path)
+  for type_name, base_path in pairs(FILE_TYPES) do
+    local sources = self[type_name]
+    if sources and #sources > 0 then
+      if type_name == "bin" then
+        ensure_path(base_path)
+      else
+        fs.makeDir(base_path)
+      end
+      for _, path in ipairs(sources) do
+        download_tree(self.owner, self.repo, self.tag, path, installed, base_path)
+      end
+    end
   end
   registry:load()
   registry:add(self, installed)
@@ -227,6 +257,19 @@ local function cmd_list()
   if count == 0 then print("Nenhum pacote instalado.") end
 end
 
+-- ─── Public API ───────────────────────────────────────────────────────────────
+
+if _is_require then
+  return {
+    install   = cmd_install,
+    uninstall = cmd_uninstall,
+    update    = cmd_update,
+    list      = cmd_list,
+    Package   = Package,
+    registry  = registry,
+  }
+end
+
 -- ─── Autocomplete ─────────────────────────────────────────────────────────────
 
 if shell then
@@ -277,4 +320,7 @@ end
 
 local cmd_args = {}
 for i = 2, #args do cmd_args[i - 1] = args[i] end
-handler(cmd_args)
+local ok, err = pcall(handler, cmd_args)
+if not ok then
+  printError("Erro: " .. tostring(err):gsub("^.+:%d+: ", ""))
+end

@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "description": "A CC:Tweaked package manager.",
   "dependencies": [],
-  "files": [
+  "bin": [
     "epc.lua"
+  ],
+  "startup": [
+    "09-epc.lua"
   ]
 }
