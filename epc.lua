@@ -1,4 +1,5 @@
-local _is_require = type((...)) == "string"
+local _COMMANDS = { install = true, uninstall = true, update = true, list = true }
+local _is_require = type((...)) == "string" and not _COMMANDS[(...)]
 
 local base64 = require("cc.base64")
 
